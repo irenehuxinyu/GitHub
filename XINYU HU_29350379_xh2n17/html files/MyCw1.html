@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<head>
+	<meta charset="utf-8">
+	<title>US Government Data</title>
+	<link rel="stylesheet" type="text/css" href="MyCw1.css">
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+	<!-- <h1 class="n">UK DEVELOPMENT PROJECT COST</h1> -->
+<div class="mytitle">
+  UK DEVELOPMENT PROJECT COST
+</div>
+	<div class="theplaner">
+	<p>Discription:</p>
+	<p>This visualization is designed for the audience who really cares about the project cost from several major US departments. Here, in the left graph, we present three different types of project cost (the lifecycle cost, the planned cost, and the projected/actual cost) Just as what is shown below, people can shift the cost they want to know by clicking on the box at the top-left corner, as well as discover the detailed information by hovering the mouse on the circle path. The left vertical bar shows the gross amount of each cost.
+Which year the project is estimated to have the highest cost? People may find the answer from the right graph, indicating the relationship between the start date and the planned cost among all sectors.
+</p>
+	</div>
+	<div class="clearfix">
+		<div class="picture-2 f-left">
+			<div class="picture-warming">
+				<script type="text/javascript" src=MyCw1.js></script>
+				</div></div>
+		<div class="picture-3 f-right">
+			<div class="picture-sector">
+				<svg width="800" height="800" ></svg>
+				<script>
+
+				var svg = d3.select("svg"),
+				    margin = {top: 20, right: 20, bottom: 30, left: 250},
+				    width = +svg.attr("width") - margin.left - margin.right,
+				    height = +svg.attr("height") - margin.top - margin.bottom,
+				    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+				var y = d3.scaleBand()			// x = d3.scaleBand()
+				    .rangeRound([0, height])	// .rangeRound([0, width])
+				    .paddingInner(0.05)
+				    .align(0.1);
+
+				var x = d3.scaleLinear()		// y = d3.scaleLinear()
+				    .rangeRound([0, width]);	// .rangeRound([height, 0]);
+
+				var z = d3.scaleOrdinal()
+				    .range(["#003333","#669999","#99CC99","#336699"]);
+
+				d3.csv("data.csv", function(d, i, columns) {
+				  for (i = 1, t = 0; i < columns.length; ++i) t += d[columns[i]] = +d[columns[i]];
+				  d.total = t;
+				  return d;
+				}, function(error, data) {
+				  if (error) throw error;
+
+				  var keys = data.columns.slice(1);
+
+				  data.sort(function(a, b) { return b.total - a.total; });
+				  y.domain(data.map(function(d) { return d.AgencyName; }));					// x.domain...
+				  x.domain([0, d3.max(data, function(d) { return d.total; })]).nice();	// y.domain...
+				  z.domain(keys);
+
+				  g.append("g")
+				    .selectAll("g")
+				    .data(d3.stack().keys(keys)(data))
+				    .enter().append("g")
+				      .attr("fill", function(d) { return z(d.key); })
+				    .selectAll("rect")
+				    .data(function(d) { return d; })
+				    .enter().append("rect")
+				      .attr("y", function(d) { return y(d.data.AgencyName); })	    //.attr("x", function(d) { return x(d.data.State); })
+				      .attr("x", function(d) { return x(d[0]); })			    //.attr("y", function(d) { return y(d[1]); })
+				      .attr("width", function(d) { return x(d[1]) - x(d[0]); })	//.attr("height", function(d) { return y(d[0]) - y(d[1]); })
+				      .attr("height", y.bandwidth());
+
+
+				  g.append("g")
+				      .attr("class", "axis")
+				      .attr("transform", "translate(0,0)") 						//  .attr("transform", "translate(0," + height + ")")
+				      .call(d3.axisLeft(y));									//   .call(d3.axisBottom(x));
+
+				  g.append("g")
+				      .attr("class", "axis")
+				    .attr("transform", "translate(0,"+height+")")				// New line
+				      .call(d3.axisBottom(x).ticks(null, "s"))					//  .call(d3.axisLeft(y).ticks(null, "s"))
+				    .append("text")
+				      .attr("y", 2)												//     .attr("y", 2)
+				      .attr("x", x(x.ticks().pop()) + 0.5) 						//     .attr("y", y(y.ticks().pop()) + 0.5)
+				      .attr("dy", "0.32em")										//     .attr("dy", "0.32em")
+				      .attr("fill", "#000")
+				      .attr("font-weight", "bold")
+				      .attr("text-anchor", "start")
+				      .text("Planned Cost")
+				    .attr("transform", "translate("+ (-width) +",-10)");   	// Newline
+
+				  var legend = g.append("g")
+				      .attr("font-family", "sans-serif")
+				      .attr("font-size", 10)
+				      .attr("text-anchor", "end")
+				    .selectAll("g")
+				    .data(keys.slice().reverse())
+				    .enter().append("g")
+				    //.attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+				   .attr("transform", function(d, i) { return "translate(-50," + (300 + i * 20) + ")"; });
+
+				  legend.append("rect")
+				      .attr("x", width - 19)
+				      .attr("width", 19)
+				      .attr("height", 19)
+				      .attr("fill", z);
+
+
+
+				  legend.append("text")
+				      .attr("x", width - 24)
+				      .attr("y", 9.5)
+				      .attr("dy", "0.32em")
+				      .text(function(d) { return d; });
+				});
+				var tooltip = svg.append("g")
+	  .attr("class", "tooltip")
+	  .style("display", "none");
+
+
+
+				</script>
+			</div>
+
+		</div>
+
+	</div>
+</body>
